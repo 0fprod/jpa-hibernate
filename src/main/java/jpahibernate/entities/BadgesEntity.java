@@ -36,13 +36,41 @@ public class BadgesEntity {
 			@JoinColumn(name = "PROJECT_ID") })
 	private List<ProjectEntity> projects;
 
-	public BadgesEntity(Long badgeId, String name) {
-		this.badgeId = badgeId;
+	public BadgesEntity(String name) {
+		
 		this.name = name;
 	}
 
 	public BadgesEntity() {
 
+	}
+	
+	public void addProject(ProjectEntity pe) {
+		if(!projects.contains(pe)) {
+			projects.add(pe);
+			pe.addBadge(this);
+		}
+	}
+	
+	public void removeProject(ProjectEntity pe) {
+		if(projects.contains(pe)) {
+			projects.remove(pe);
+			pe.removeBadge(this);
+		}
+	}
+	
+	public void addUser(UserEntity ue) {
+		if(!users.contains(ue)) {
+			users.add(ue);
+			ue.addBadge(this);
+		}
+	}
+	
+	public void removeUser(UserEntity ue) {
+		if(!users.contains(ue)) {
+			users.add(ue);
+			ue.removeBadge(this);
+		}
 	}
 
 	@Override

@@ -40,7 +40,16 @@ public class UserEntity {
 			groups.add(group);
 			group.addUser(this);
 		}
-
+	}
+	
+	public void addBadge(BadgesEntity be) {
+		if(!badges.contains(be))
+			badges.add(be);
+	}
+	
+	public void removeBadge(BadgesEntity be) {
+		if(badges.contains(be))
+			badges.remove(be);
 	}
 
 	@Override

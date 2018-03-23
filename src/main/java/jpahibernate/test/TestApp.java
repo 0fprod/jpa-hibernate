@@ -1,32 +1,42 @@
 package jpahibernate.test;
 
 import java.util.List;
+import java.util.Random;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import jpahibernate.entities.BadgesEntity;
 import jpahibernate.entities.GroupEntity;
 import jpahibernate.entities.ProjectEntity;
 import jpahibernate.entities.ProjectMetricsEntity;
+import jpahibernate.entities.ProjectReportsEntity;
+import jpahibernate.entities.RankingEntity;
 import jpahibernate.entities.RoleEntity;
 import jpahibernate.entities.UserEntity;
 
+@SuppressWarnings("unused")
 public class TestApp {
 
 	private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("aplicacion");;
 
 	public static void main(String[] args) {
 
-		// createGroups();
-		// createRoles();
-		// createUsers();
-		// mixGroupUser();
-		// createProjects();
-		// mixGroupProject();
-		// createMetrics();
-
-		listAll();
+//		 createGroups();
+//		 createRoles();
+//		 createUsers();
+//		 mixGroupUser();
+//		 createProjects();
+//		 mixGroupProject();
+//		 createMetrics(); //Fix - Select from Ranking Where project id = :param
+		 createReports();
+		 createBadges();
+		 mixBadgesAndProjects();
+		 mixBadgesAndUsers();
+				
+		listAll();			
+		getRanking();
 	}
 
 	private static void createGroups() {
@@ -114,7 +124,7 @@ public class TestApp {
 		em.getTransaction().begin();
 
 		ProjectEntity project1 = new ProjectEntity("ID1", "Project 1");
-		ProjectEntity project2 = new ProjectEntity("ID2", "Project 3");
+		ProjectEntity project2 = new ProjectEntity("ID2", "Project 2");
 		ProjectEntity project3 = new ProjectEntity("ID3", "Project 3");
 
 		em.persist(project1);
@@ -153,20 +163,153 @@ public class TestApp {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
 		
-		ProjectMetricsEntity pm_rev1 = new ProjectMetricsEntity(250);		
 		ProjectEntity project1 = em.find(ProjectEntity.class, "ID1");
+		project1.addMetrics(new ProjectMetricsEntity(250));
+		analyzeProject(project1, em);
 		
-		pm_rev1.setProject(project1);
-		project1.addMetrics(pm_rev1);
-		//TODO aprovechar y re-calcular el ranking
+		ProjectEntity project2 = em.find(ProjectEntity.class, "ID2");
+		project2.addMetrics(new ProjectMetricsEntity(181));
+		analyzeProject(project2, em);
+		
+		ProjectEntity project3 = em.find(ProjectEntity.class, "ID3");
+		project3.addMetrics(new ProjectMetricsEntity(98));
+		analyzeProject(project3, em);
 		
 		em.merge(project1);
+		em.merge(project2);
+		em.merge(project3);
 		
 		em.getTransaction().commit();
 		em.close();
 	}
 	
 	private static void createReports() {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+		
+		ProjectEntity project1 = em.find(ProjectEntity.class, "ID1");
+		project1.addReports(new ProjectReportsEntity("DOC1"));
+	
+		
+		ProjectEntity project2 = em.find(ProjectEntity.class, "ID2");
+		project2.addReports(new ProjectReportsEntity("DOC1"));
+		project2.addReports(new ProjectReportsEntity("DOC2"));
+				
+		em.merge(project1);
+		em.merge(project2);
+		
+		em.getTransaction().commit();
+		em.close();
+	}
+	
+	private static void createBadges() {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+		
+		BadgesEntity be1 = new BadgesEntity("BadgeProjectOro");
+		BadgesEntity be2 = new BadgesEntity("BadgeProjectPlata");
+		BadgesEntity be3 = new BadgesEntity("BadgeProjectBronce");
+		BadgesEntity be4 = new BadgesEntity("BadgeUserOro");
+		BadgesEntity be5 = new BadgesEntity("BadgeUserPlata");
+		BadgesEntity be6 = new BadgesEntity("BadgeUserBronce");
+		
+		em.persist(be1);
+		em.persist(be2);
+		em.persist(be3);
+		em.persist(be4);
+		em.persist(be5);
+		em.persist(be6);
+		
+		
+		em.getTransaction().commit();
+		em.close();
+	}
+	
+	private static void mixBadgesAndProjects() {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+		
+		BadgesEntity be1 = em.find(BadgesEntity.class, 1L);
+		BadgesEntity be2 = em.find(BadgesEntity.class, 2L);
+		BadgesEntity be3 = em.find(BadgesEntity.class, 3L);
+
+		
+		be1.addProject(em.find(ProjectEntity.class, "ID1"));
+				
+		be2.addProject(em.find(ProjectEntity.class, "ID2"));
+		be3.addProject(em.find(ProjectEntity.class, "ID2"));
+		
+		be1.addProject(em.find(ProjectEntity.class, "ID3"));
+		be2.addProject(em.find(ProjectEntity.class, "ID3"));
+		be3.addProject(em.find(ProjectEntity.class, "ID3"));
+				
+		em.merge(be1);
+		em.merge(be2);
+		em.merge(be3);
+		
+		em.getTransaction().commit();
+		em.close();
+	}
+	
+	private static void mixBadgesAndUsers() {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+		
+		BadgesEntity be4 = em.find(BadgesEntity.class, 4L);
+		BadgesEntity be5 = em.find(BadgesEntity.class, 5L);
+		BadgesEntity be6 = em.find(BadgesEntity.class, 6L);
+		
+		be4.addUser(em.find(UserEntity.class, "A6"));
+		be5.addUser(em.find(UserEntity.class, "A6"));
+		be6.addUser(em.find(UserEntity.class, "A6"));
+		
+		be4.addUser(em.find(UserEntity.class, "A7"));
+		be6.addUser(em.find(UserEntity.class, "A7"));
+		
+		be4.addUser(em.find(UserEntity.class, "A1"));
+		
+		be4.addUser(em.find(UserEntity.class, "A2"));
+				
+		em.getTransaction().commit();
+		em.close();
+	}
+	
+	private static void analyzeProject(ProjectEntity project, EntityManager em) {			
+		Random rand = new Random();
+		RankingEntity re = (RankingEntity) em.find(RankingEntity.class, project.getProjectId());		
+		
+		if(null == re)
+			re = new RankingEntity(10.0 * rand.nextDouble());				
+		else 
+			re.setCalification(10.0 * rand.nextDouble());
+				
+		re.setProject(project);		
+		em.persist(re);
+	}
+	
+	private static void getRanking() {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+		
+		List<RankingEntity> ranking = em.createQuery("FROM RankingEntity ORDER BY calification DESC").getResultList();
+		
+		for(RankingEntity r : ranking) {
+			System.out.println(" ** " + r);
+		}
+		
+		em.getTransaction().commit();
+		em.close();
+	}
+	
+	private static void removeOneGroup() {
+		
+	}
+	
+	private static void removeOneUser() {
+		
+	}
+	
+	private static void removeOneProject() {
 		
 	}
 	
@@ -179,6 +322,9 @@ public class TestApp {
 		List<UserEntity> users = em.createQuery("FROM UserEntity").getResultList();
 		List<ProjectEntity> projects = em.createQuery("FROM ProjectEntity").getResultList();
 		List<ProjectMetricsEntity> metrics = em.createQuery("FROM ProjectMetricsEntity").getResultList();
+		List<ProjectReportsEntity> reports = em.createQuery("FROM ProjectReportsEntity").getResultList();
+		List<BadgesEntity> badges = em.createQuery("FROM BadgesEntity").getResultList();
+
 
 		System.out.println(" -- Hay " + groups.size() + " grupos:");
 		for (GroupEntity g : groups) {
@@ -205,6 +351,15 @@ public class TestApp {
 			System.out.println(" ---- " + pm);
 		}
 
+		System.out.println(" -- Hay " + reports.size() + " informes:");
+		for (ProjectReportsEntity pr : reports) {
+			System.out.println(" ---- " + pr);
+		}
+		
+		System.out.println(" -- Hay " + badges.size() + " medallas:");
+		for (BadgesEntity be : badges) {
+			System.out.println(" ---- " + be);
+		}
 		
 		em.getTransaction().commit();
 		em.close();

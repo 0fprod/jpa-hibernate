@@ -29,11 +29,14 @@ public class ProjectEntity {
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
 	private List<ProjectMetricsEntity> metrics;
 
-	@OneToMany(mappedBy = "project", orphanRemoval = false)
+	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
 	private List<ProjectReportsEntity> reports;
 
 	@ManyToMany(mappedBy = "projects")
 	private List<BadgesEntity> badges;
+
+	@OneToOne(mappedBy = "project")
+	private RankingEntity ranking;
 
 	public ProjectEntity() {
 
@@ -45,64 +48,30 @@ public class ProjectEntity {
 	}
 
 	public void addMetrics(ProjectMetricsEntity pme) {
-		if(!metrics.contains(pme)) {
+		if (!metrics.contains(pme)) {
 			metrics.add(pme);
+			pme.setProject(this);
 		}
 	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((badges == null) ? 0 : badges.hashCode());
-		result = prime * result + ((group == null) ? 0 : group.hashCode());
-		result = prime * result + ((metrics == null) ? 0 : metrics.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((projectId == null) ? 0 : projectId.hashCode());
-		result = prime * result + ((reports == null) ? 0 : reports.hashCode());
-		return result;
+
+	public void addReports(ProjectReportsEntity pre) {
+		if (!reports.contains(pre)) {
+			reports.add(pre);
+			pre.setProject(this);
+		}
+
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ProjectEntity other = (ProjectEntity) obj;
-		if (badges == null) {
-			if (other.badges != null)
-				return false;
-		} else if (!badges.equals(other.badges))
-			return false;
-		if (group == null) {
-			if (other.group != null)
-				return false;
-		} else if (!group.equals(other.group))
-			return false;
-		if (metrics == null) {
-			if (other.metrics != null)
-				return false;
-		} else if (!metrics.equals(other.metrics))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (projectId == null) {
-			if (other.projectId != null)
-				return false;
-		} else if (!projectId.equals(other.projectId))
-			return false;
-		if (reports == null) {
-			if (other.reports != null)
-				return false;
-		} else if (!reports.equals(other.reports))
-			return false;
-		return true;
+	public void addBadge(BadgesEntity be) {
+		if (!badges.contains(be)) {
+			badges.add(be);
+		}
+	}
+
+	public void removeBadge(BadgesEntity be) {
+		if (badges.contains(be)) {
+			badges.remove(be);
+		}
 	}
 
 	@Override
@@ -159,7 +128,73 @@ public class ProjectEntity {
 		this.badges = badges;
 	}
 
-	
+	public RankingEntity getRanking() {
+		return ranking;
+	}
 
-	
+	public void setRanking(RankingEntity ranking) {
+		this.ranking = ranking;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((badges == null) ? 0 : badges.hashCode());
+		result = prime * result + ((group == null) ? 0 : group.hashCode());
+		result = prime * result + ((metrics == null) ? 0 : metrics.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((projectId == null) ? 0 : projectId.hashCode());
+		result = prime * result + ((ranking == null) ? 0 : ranking.hashCode());
+		result = prime * result + ((reports == null) ? 0 : reports.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ProjectEntity other = (ProjectEntity) obj;
+		if (badges == null) {
+			if (other.badges != null)
+				return false;
+		} else if (!badges.equals(other.badges))
+			return false;
+		if (group == null) {
+			if (other.group != null)
+				return false;
+		} else if (!group.equals(other.group))
+			return false;
+		if (metrics == null) {
+			if (other.metrics != null)
+				return false;
+		} else if (!metrics.equals(other.metrics))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (projectId == null) {
+			if (other.projectId != null)
+				return false;
+		} else if (!projectId.equals(other.projectId))
+			return false;
+		if (ranking == null) {
+			if (other.ranking != null)
+				return false;
+		} else if (!ranking.equals(other.ranking))
+			return false;
+		if (reports == null) {
+			if (other.reports != null)
+				return false;
+		} else if (!reports.equals(other.reports))
+			return false;
+		return true;
+	}
+
 }

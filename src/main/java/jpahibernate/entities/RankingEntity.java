@@ -3,12 +3,10 @@ package jpahibernate.entities;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -16,16 +14,14 @@ import javax.persistence.Table;
 public class RankingEntity {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SQ_RANKING")
-	@SequenceGenerator(name = "SQ_RANKING", sequenceName = "SQ_RANKING", allocationSize = 1)
-	@Column(name = "RANKING_ID")
-	private Long rankingId;
+	private String projectId;
 
 	@Column(name = "CALIFICATION")
 	private Double calification;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PROJECT_ID")
+	@JoinColumn(name = "PROJECT_ID", unique = true)
+	@MapsId
 	private ProjectEntity project;
 
 	public RankingEntity(Double calification) {
@@ -36,13 +32,29 @@ public class RankingEntity {
 
 	}
 
+	public Double getCalification() {
+		return calification;
+	}
+
+	public void setCalification(Double calification) {
+		this.calification = calification;
+	}
+
+	public ProjectEntity getProject() {
+		return project;
+	}
+
+	public void setProject(ProjectEntity project) {
+		this.project = project;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((calification == null) ? 0 : calification.hashCode());
 		result = prime * result + ((project == null) ? 0 : project.hashCode());
-		result = prime * result + ((rankingId == null) ? 0 : rankingId.hashCode());
+		result = prime * result + ((projectId == null) ? 0 : projectId.hashCode());
 		return result;
 	}
 
@@ -65,41 +77,17 @@ public class RankingEntity {
 				return false;
 		} else if (!project.equals(other.project))
 			return false;
-		if (rankingId == null) {
-			if (other.rankingId != null)
+		if (projectId == null) {
+			if (other.projectId != null)
 				return false;
-		} else if (!rankingId.equals(other.rankingId))
+		} else if (!projectId.equals(other.projectId))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "RankingEntity [rankingId=" + rankingId + ", calification=" + calification + "]";
-	}
-
-	public Long getRankingId() {
-		return rankingId;
-	}
-
-	public void setRankingId(Long rankingId) {
-		this.rankingId = rankingId;
-	}
-
-	public Double getCalification() {
-		return calification;
-	}
-
-	public void setCalification(Double calification) {
-		this.calification = calification;
-	}
-
-	public ProjectEntity getProject() {
-		return project;
-	}
-
-	public void setProject(ProjectEntity project) {
-		this.project = project;
+		return "RankingEntity [calification=" + calification + ", project=" + project + "]";
 	}
 
 }

@@ -33,7 +33,7 @@ public class GroupEntity {
 			@JoinColumn(name = "USER_DAS") })
 	private List<UserEntity> users;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, orphanRemoval = false)
 	@JoinTable(name = "GROUP_PROJECTS", joinColumns = { @JoinColumn(name = "GROUP_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "PROJECT_ID") })
 	private ProjectEntity project;

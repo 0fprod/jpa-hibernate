@@ -68,7 +68,7 @@ public class BadgesEntity {
 	
 	public void removeUser(UserEntity ue) {
 		if(!users.contains(ue)) {
-			users.add(ue);
+			users.remove(ue);
 			ue.removeBadge(this);
 		}
 	}

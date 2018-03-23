@@ -55,7 +55,6 @@ public class BadgesEntity {
 	public void removeProject(ProjectEntity pe) {
 		if(projects.contains(pe)) {
 			projects.remove(pe);
-			pe.removeBadge(this);
 		}
 	}
 	
@@ -67,9 +66,8 @@ public class BadgesEntity {
 	}
 	
 	public void removeUser(UserEntity ue) {
-		if(!users.contains(ue)) {
-			users.remove(ue);
-			ue.removeBadge(this);
+		if(users.contains(ue)) {
+			users.remove(ue);			
 		}
 	}
 

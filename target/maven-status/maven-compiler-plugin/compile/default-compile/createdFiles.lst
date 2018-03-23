@@ -1,0 +1,10 @@
+jpahibernate\entities\ProjectEntity.class
+jpahibernate\entities\ReportNotificationEntity.class
+jpahibernate\test\TestApp.class
+jpahibernate\entities\RankingEntity.class
+jpahibernate\entities\UserEntity.class
+jpahibernate\entities\BadgesEntity.class
+jpahibernate\entities\ProjectMetricsEntity.class
+jpahibernate\entities\RoleEntity.class
+jpahibernate\entities\GroupEntity.class
+jpahibernate\entities\ProjectReportsEntity.class

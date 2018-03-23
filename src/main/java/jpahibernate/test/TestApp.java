@@ -16,10 +16,10 @@ import jpahibernate.entities.RankingEntity;
 import jpahibernate.entities.RoleEntity;
 import jpahibernate.entities.UserEntity;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","unchecked"})
 public class TestApp {
 
-	private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("aplicacion");;
+	private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("aplicacion");
 
 	public static void main(String[] args) {
 
@@ -29,15 +29,18 @@ public class TestApp {
 		// mixGroupUser();
 		// createProjects();
 		// mixGroupProject();
-		// createMetrics(); //Fix - Select from Ranking Where project id = :param
+		// createMetrics(); 
 		// createReports();
 		// createBadges();
 		// mixBadgesAndProjects();
 		// mixBadgesAndUsers();
 
 		// removeOneGroup(1L);
-		
-		removeOneUser("A7");
+		// removeOneUser("A6");
+		// removeOneProject("ID2");
+		// updateUser("A2");
+		// updateGroup(2L);
+		// updateProject("ID4");
 
 		listAll();
 		// getRanking();
@@ -302,12 +305,6 @@ public class TestApp {
 		em.close();
 	}
 
-	/**
-	 * Elimina el groupo con la id , elimina la tupla de group_user, group_project,
-	 * quedando el proyecto vivo con grupo null y los usuarios con su resto de grupo
-	 * 
-	 * @param group_id
-	 */
 	private static void removeOneGroup(Long group_id) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
@@ -320,19 +317,17 @@ public class TestApp {
 
 	private static void removeOneUser(String user_das) {
 		EntityManager em = emf.createEntityManager();
-		em.getTransaction().begin();	
-		
+		em.getTransaction().begin();
+
 		UserEntity ue = em.find(UserEntity.class, user_das);
-		
-		for(GroupEntity group : ue.getGroups()) { //funciona
+
+		for (BadgesEntity badge : ue.getBadges()) {
+			badge.removeUser(ue);
+		}
+
+		for (GroupEntity group : ue.getGroups()) {
 			group.removeUser(ue);
 		}
-		
-		for(BadgesEntity badge : ue.getBadges()) { //no funciona, quizas hay que cargar el badge, borrar el user y guardar el badge
-			badge.removeUser(ue);			
-		}
-		
-		
 
 		em.remove(ue);
 
@@ -340,8 +335,76 @@ public class TestApp {
 		em.close();
 	}
 
-	private static void removeOneProject() {
+	private static void removeOneProject(String project_id) {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
 
+		ProjectEntity project = em.find(ProjectEntity.class, project_id);
+
+		// Desvincula el grupo, sin eliminarlo
+		GroupEntity group = (GroupEntity) em.createQuery("FROM GroupEntity WHERE project = :project")
+				.setParameter("project", project).getSingleResult();
+		group.setProject(null);
+		em.merge(group);
+
+		// Desvincular de los badges
+		for (BadgesEntity badge : project.getBadges())
+			badge.removeProject(project);
+
+		// Eliminar los metrics con el CascadeAll
+		// Eliminar los informes con el CascadeAll
+
+		// Eliminar del ranking
+		RankingEntity ranking = em.find(RankingEntity.class, project_id);
+		em.remove(ranking);
+		em.remove(project);
+
+		em.getTransaction().commit();
+		em.close();
+	}
+
+	private static void updateUser(String user_das) {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+
+		UserEntity user = em.find(UserEntity.class, user_das);
+		RoleEntity role = em.find(RoleEntity.class, 1L);
+
+		user.setRole(role);
+
+		em.persist(user);
+
+		em.getTransaction().commit();
+		em.close();
+	}
+
+	private static void updateGroup(Long group_id) {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+
+		GroupEntity group = em.find(GroupEntity.class, group_id);
+		// El proyecto tiene que existir en la BD antes d ser asignado a un grupo
+		ProjectEntity project = new ProjectEntity("ID4", "Project 4");
+		project.setGroup(group);
+		em.persist(project);
+
+		group.setProject(project);
+		em.persist(group);
+
+		em.getTransaction().commit();
+		em.close();
+	}
+
+	private static void updateProject(String project_id) {
+		EntityManager em = emf.createEntityManager();
+		em.getTransaction().begin();
+
+		ProjectEntity project = em.find(ProjectEntity.class, project_id);
+		project.setName("UpdatedProject");
+		em.persist(project);
+
+		em.getTransaction().commit();
+		em.close();
 	}
 
 	private static void listAll() {
